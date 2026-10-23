@@ -1,0 +1,18 @@
+{
+  "rows": 636,
+  "missing": {
+    "battery_id": 0,
+    "cycle": 0,
+    "capacity_Ah": 0,
+    "ambient_temp_C": 0
+  },
+  "duplicates": 0,
+  "temperature_values": [
+    24.0
+  ],
+  "capacity_range": [
+    1.1538,
+    2.0353
+  ],
+  "seed": "deterministic, no random split"
+}
