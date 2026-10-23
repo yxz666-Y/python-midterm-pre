@@ -41,3 +41,5 @@ PPT与视频在2026-10-31以前交学习通；报告2026-11-08晚12点前交Word
 
 仓库：https://github.com/yxz666-Y/python-midterm-pre
 保留每次真实提交，不压缩或强制覆盖已有历史。仅把源码、输入、最终成果和结果数据入库，虚拟环境与渲染临时文件不入库。
+
+本机PPT重建：设置RUNTIME_NODE_MODULES为Codex工作区依赖加载器返回的Node包目录，使用其Node运行src/build_slides.mjs。最终输出文件存在时，先将其移到工作副本或改用新的输出文件名，校验器不会覆盖已有文件。报告渲染所需的中文fontconfig配置只影响本机预览，不改变DOCX内容。

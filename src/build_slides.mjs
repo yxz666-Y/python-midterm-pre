@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {Presentation,PresentationFile} from '@oai/artifact-tool';
+import {createRequire} from 'node:module';
+const req=createRequire(process.env.RUNTIME_NODE_MODULES+'/package.json');
+const {Presentation,PresentationFile}=await import(req.resolve('@oai/artifact-tool'));
 const root=process.cwd();const out=path.join(root,'.build');
 const p=Presentation.create({slideSize:{width:1280,height:720}});
 const slides=[
