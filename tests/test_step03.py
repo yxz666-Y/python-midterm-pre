@@ -31,6 +31,11 @@ class FeatureTests(unittest.TestCase):
         self.assertAlmostEqual(row.mean5_Ah, 2.97)
         self.assertAlmostEqual(row.slope5_Ah_per_cycle, -.01)
 
+    def test_linear_known_trend(self):
+        train = pd.DataFrame({'cycle': np.arange(1,21), 'capacity_Ah': 3-.01*np.arange(1,21)})
+        target = pd.DataFrame({'cycle': [21,22]})
+        np.testing.assert_allclose(m.linear_predict(train, target), [2.79,2.78])
+
     def test_splits_and_rows(self):
         df = m.make_features(self.raw)
         self.assertEqual(len(df), 616)

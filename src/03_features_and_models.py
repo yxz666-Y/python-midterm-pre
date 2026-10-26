@@ -39,6 +39,13 @@ def score(y, pred):
             'RMSE_Ah': float(np.sqrt(np.mean(error**2)))}
 
 
+def linear_predict(train, target):
+    """最小二乘拟合容量=a+b×循环次数。测试阶段仅在前80%重拟合。"""
+    x = np.column_stack([np.ones(len(train)), train.cycle])
+    beta = np.linalg.lstsq(x, train.capacity_Ah.to_numpy(), rcond=None)[0]
+    return np.column_stack([np.ones(len(target)), target.cycle]) @ beta
+
+
 def main():
     raw = pd.read_csv(ROOT/'results/step01/battery_clean.csv')
     data = make_features(raw)
@@ -49,13 +56,17 @@ def main():
     for battery, g in data.groupby('battery_id'):
         for split in ['validation', 'test']:
             segment = g[g.split == split]
-            # 无需训练的基线：下一次容量等于最近一次实测容量。
-            pred = segment.lag1_Ah.to_numpy()
-            metrics.append({'battery_id': battery, 'split': split, 'model': 'persistence',
-                            'n': len(segment), **score(segment.capacity_Ah, pred)})
-            predictions.append(pd.DataFrame({'battery_id': battery, 'cycle': segment.cycle,
-                'split': split, 'model': 'persistence', 'actual_Ah': segment.capacity_Ah,
-                'predicted_Ah': pred}))
+            train = g[g.split == 'train'] if split == 'validation' else g[g.split != 'test']
+            model_predictions = {
+                'persistence': segment.lag1_Ah.to_numpy(),
+                'linear_cycle': linear_predict(train, segment),
+            }
+            for model, pred in model_predictions.items():
+                metrics.append({'battery_id': battery, 'split': split, 'model': model,
+                                'n': len(segment), **score(segment.capacity_Ah, pred)})
+                predictions.append(pd.DataFrame({'battery_id': battery, 'cycle': segment.cycle,
+                    'split': split, 'model': model, 'actual_Ah': segment.capacity_Ah,
+                    'predicted_Ah': pred}))
     pd.DataFrame(metrics).to_csv(out/'metrics.csv', index=False, encoding='utf-8-sig')
     pd.concat(predictions).to_csv(out/'predictions.csv', index=False, encoding='utf-8-sig')
     print(pd.DataFrame(metrics).to_string(index=False))
