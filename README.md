@@ -8,7 +8,7 @@
 - `src/02_visualize_degradation.py`：退化曲线与个体差异。
 - `src/03_features_and_models.py`：历史特征、上一循环基线、线性回归与岭回归的单步容量预测。
 - `docs/第三步_特征与建模.md`：建模口径、时间划分、评估结果及版本记录。
-- `deliverables/题目三_工作过程_读取清洗与退化分析.pptx`：保留原10页过程PPT，目前涵盖前两步。
+- `deliverables/题目三_工作过程.pptx`：19页过程PPT，涵盖读取清洗、退化分析、特征建模及Git版本记录。
 
 ## 运行
 
