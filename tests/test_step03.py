@@ -36,6 +36,21 @@ class FeatureTests(unittest.TestCase):
         target = pd.DataFrame({'cycle': [21,22]})
         np.testing.assert_allclose(m.linear_predict(train, target), [2.79,2.78])
 
+    def test_test_values_do_not_change_tuning(self):
+        data = m.make_features(self.raw)
+        g = data[data.battery_id == 'B0005'].copy()
+        best, scores = m.select_alpha(g)
+        g.loc[g.split == 'test', m.FEATURES + ['capacity_Ah']] = 999.
+        self.assertEqual((best, scores), m.select_alpha(g))
+
+    def test_ridge_intercept_and_training_scale(self):
+        g = m.make_features(self.raw)
+        train = g[(g.battery_id == 'B0005') & (g.split == 'train')].copy()
+        train['capacity_Ah'] = 2.
+        model = m.fit_ridge(train, 10.)
+        np.testing.assert_allclose(model['mean'], train[m.FEATURES].mean())
+        np.testing.assert_allclose(m.predict_ridge(model, g), 2., atol=1e-9)
+
     def test_splits_and_rows(self):
         df = m.make_features(self.raw)
         self.assertEqual(len(df), 616)

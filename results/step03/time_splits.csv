@@ -1,0 +1,13 @@
+﻿battery_id,split,first_cycle,last_cycle,n
+B0005,test,135,168,34
+B0005,train,6,100,95
+B0005,validation,101,134,34
+B0006,test,135,168,34
+B0006,train,6,100,95
+B0006,validation,101,134,34
+B0007,test,135,168,34
+B0007,train,6,100,95
+B0007,validation,101,134,34
+B0018,test,106,132,27
+B0018,train,6,79,74
+B0018,validation,80,105,26
