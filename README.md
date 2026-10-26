@@ -36,7 +36,9 @@ python -m unittest discover -s tests -v
 ## 第四步 评估与不确定性初步分析
 
 - `src/04_evaluation_and_uncertainty.py`：读取01和03的结果，分析容量高估与低估、核对80%研究阈值事件覆盖，并进行固定起点线性寿命外推的历史长度敏感性实验。
-- 运行：`python src/04_evaluation_and_uncertainty.py`；结果在`results/step04`，三张图在`figures/step04`。
+- 新增滚动预警回测：从第30次起用已知历史预测未来5次内首次跨阈值，比较容量保持基线和最近20次线性趋势；提前量须在有效预测范围内，未知标签不计作负样本。
+- 运行：`python src/04_evaluation_and_uncertainty.py`；结果在`results/step04`，四张图在`figures/step04`。
 - 说明见`docs/第四步_评估与不确定性.md`，对应报告第6章与第7章建议；Word和PPT尚未更新。
 - 四块电池首次跨80%阈值均早于第三步测试段，当前测试不能验证首次事件的提前预警；外推敏感性不是置信区间，80%不是设备通用更换标准。
-- 复查：`python -m unittest discover -s tests -v`。本轮15项检查通过。
+- 加强每电池三种模型的完整性检查；修正单步误报被计为提前预警的问题。新增回测属于同四块电池上的探索性分析，重叠窗口不作为独立样本。
+- 复查：`python -m unittest discover -s tests -v`。本轮24项检查通过。

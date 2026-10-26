@@ -8,19 +8,34 @@
   ],
   "origin_rule": "floor(fraction * observed length)",
   "event_definition": "first measured capacity <= threshold, no sustained-crossing rule",
-  "alert_mode": "one-step state classification; first-event lead only if first crossing in test",
+  "alert_mode": "one-step; only correctly predicted first-crossing target gives lead=1",
+  "rolling_warning": {
+    "start_cycle": 30,
+    "horizon_cycles": 5,
+    "fit_window": 20,
+    "models": [
+      "persistence",
+      "linear_recent"
+    ],
+    "stopping": "after first observed crossing",
+    "unknown_label": "incomplete horizon without observed crossing",
+    "event_matching": "actual first crossing within fixed forecast horizon",
+    "parameters": "fixed before running this exploratory backtest"
+  },
   "extrapolation_mode": "linear capacity trend fitted on prefix only; frozen at origin",
   "limitations": [
     "retrospective origins depend on available record lengths",
     "sensitivity spread is not a confidence or prediction interval",
     "no new battery or variable-temperature validation",
-    "test results are descriptive, not further model selection"
+    "test results are descriptive, not further model selection",
+    "rolling windows overlap and share the same four already examined batteries",
+    "rolling event detection is horizon-based, not accurate crossing-date prediction"
   ],
   "inputs_sha256": {
     "clean": "3b161031d14de4b857a9af4a7cc19791214ec0ad6578d858b55068f28c7deda7",
     "predictions": "08a82ac463b93cc8f8583a18f26eee346e9b0d509c9f4b717619835e76a35c99"
   },
-  "script_sha256": "f5a65c3d69de40537361cbbbc1070e5071500d7b234518a50908ae1a7e40a720",
+  "script_sha256": "f3be64d9555a0118fa8442fe8c9836a92aefddc62384e7c59f1ae70852761c80",
   "versions": {
     "python": "3.12.14",
     "numpy": "2.3.5",
