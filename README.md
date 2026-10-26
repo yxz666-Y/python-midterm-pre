@@ -1,46 +1,35 @@
 # 无人设备电池健康评估与剩余寿命预测
 
-Python数据分析编程题目三。已知成员：杨晓真，25121619。
+Python数据分析编程题目三。杨晓真，25121619。
 
-## 运行分析
+## 当前进度：按步骤重新开展
 
-需要Python 3.12，建议创建虚拟环境：
+本轮只完成数据读取、清洗、退化曲线和个体差异分析；后续再开展特征提取、至少两种模型的比较与不确定性评估。不制作视频。
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python src/analyze.py
-python src/verify_results.py
+python src/01_read_and_clean.py
+python src/02_visualize_degradation.py
 ```
 
-输入是课程提供的636行容量CSV，保存在data/battery.csv。运行生成results中的逐点预测、各电池指标、经验误差带、寿命外推结果与figures中的四张图。算法是确定性的，没有随机打乱。
+1. `src/01_read_and_clean.py`：检查字段、缺失、重复、主键冲突、数值有效性与循环连续性，排序并保存清洗结果。636条记录全部保留，不修改原始CSV。
+2. `src/02_visualize_degradation.py`：绘制全部容量曲线，统一前132次循环比较相对首循环容量，导出统计表与PPT数据。
+3. `figures/step02/`：三张当前分析图。
+4. `results/step01/`、`results/step02/`：当前分析的可复查数据。
+5. `deliverables/题目三_工作过程_读取清洗与退化分析.pptx`：从读取、清洗到可视化的10页工作过程记录，图表可编辑。
 
-## 方法与结果
+前132次容量下降：B0005 26.49%，B0006 35.36%，B0007 21.90%，B0018 27.70%。首循环归一化用于描述个体差异，不等于制造商额定容量口径的SOH，也不是剩余寿命预测。B0018只有132次记录，不把观测结束当作失效。
 
-按每块电池前60%训练、中间20%验证、最后20%测试。比较上一循环基线、循环线性回归、历史特征岭回归。每次预测下一循环，允许使用前次真实观测。基线在四块电池测试RMSE上均最低。寿命实验单独使用前30%拟合趋势，以80%首循环容量作为研究阈值，不使用未来真实值拟合。
+## 历史材料与版本
 
-## 交付文件
-
-- deliverables/题目三_项目报告.docx：按课程模板章节组织的报告。
-- deliverables/*.pptx：8页可编辑PPT，图表含数据。
-- deliverables/五分钟汇报讲稿.md 与 答辩准备.md。
-
-## 提交前必须补充
-
-组号、组长、学院、专业、其他两位成员姓名/学号、每人的真实分工及个人说明。PPT当前文件名明确保留待填项，确认后按“组号_3_组长姓名”命名。按用户最新要求，本项目不制作视频；课程文件中的视频要求仍需小组自行安排。不能把AI生成记录说成三位成员独立完成的提交。
-
-PPT与视频在2026-10-31以前交学习通；报告2026-11-08晚12点前交Word电子版，另交纸质版至未来技术学院418。学习通上传、纸质打印和现场问答由小组完成。
-
-## 文件生成与环境
-
-报告构建脚本为src/build_report.py，依赖python-docx与模板references/项目报告模版.docx。运行前先生成分析图表。演示构建脚本使用Codex提供的@oai/artifact-tool运行环境，非分析必需依赖。图表字体使用macOS Arial Unicode MS，其他系统请安装中文字体并修改字体设置。
-
-## 版本管理
+按用户要求，旧报告和旧PPT已从当前版本删除，原始报告模板仍保留。旧的 `src/analyze.py`、`src/build_report.py`、`src/build_slides.mjs`、根层 results/figures 与原讲稿、答辩材料属于此前版本，不代表本次逐步工作进度；当前入口仅为以上01、02脚本及过程PPT。不要运行旧构建脚本生成交付件。
 
 仓库：https://github.com/yxz666-Y/python-midterm-pre
-保留每次真实提交，不压缩或强制覆盖已有历史。仅把源码、输入、最终成果和结果数据入库，虚拟环境与渲染临时文件不入库。
 
-本机PPT重建：设置RUNTIME_NODE_MODULES为Codex工作区依赖加载器返回的Node包目录，使用其Node运行src/build_slides.mjs。最终输出文件存在时，先将其移到工作副本或改用新的输出文件名，校验器不会覆盖已有文件。报告渲染所需的中文fontconfig配置只影响本机预览，不改变DOCX内容。
+每个阶段进行真实Git提交并推送，保留既有历史，不压缩或强制覆盖。后续学习通提交、组员实际分工和组号等信息仍需补充；本过程稿不是全项目最终提交稿。
 
-用户已取消视频制作。当前版本移除视频及生成脚本，既有Git提交历史保留。
+## PPT重建
+
+使用Codex工作区依赖加载器返回的Node与Node包目录：设置 `RUNTIME_NODE_MODULES`，运行 `src/build_process_slides.mjs`。该脚本使用 `@oai/artifact-tool` 并做文件结构及布局检查。`PRESENTATIONS_SKILL` 可指定演示文稿技能目录。已有输出需移到临时目录后重建，校验器不会覆盖已有交付文件。分析绘图默认使用macOS Arial Unicode MS；其他系统请配置中文字体。
