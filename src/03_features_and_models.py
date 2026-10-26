@@ -4,6 +4,10 @@
 """
 from pathlib import Path
 import json
+import hashlib
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -75,6 +79,34 @@ def select_alpha(g):
     return best, scores
 
 
+def plot_results(metrics, predictions):
+    """图表只展示评估结果，不参与选参。"""
+    dest = ROOT/'figures/step03'
+    dest.mkdir(parents=True, exist_ok=True)
+    plt.rcParams.update({'font.family': 'Arial Unicode MS', 'axes.unicode_minus': False})
+    names = {'persistence': '上一循环基线', 'linear_cycle': '循环线性回归',
+             'ridge_history': '历史特征岭回归'}
+    test = metrics[metrics.split == 'test']
+    table = test.pivot(index='battery_id', columns='model', values='RMSE_Ah')[list(names)]
+    ax = table.rename(columns=names).plot.bar(figsize=(10, 5), rot=0)
+    ax.set(xlabel='电池编号', ylabel='测试RMSE（Ah，越小越好）', title='三种方法在同一测试段的容量预测误差')
+    ax.figure.tight_layout()
+    ax.figure.savefig(dest/'model_comparison.png', dpi=180)
+    plt.close(ax.figure)
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8), layout='constrained')
+    for ax, (battery, g) in zip(axes.flat, predictions[predictions.split == 'test'].groupby('battery_id')):
+        actual = g.drop_duplicates('cycle').sort_values('cycle')
+        ax.plot(actual.cycle, actual.actual_Ah, color='black', lw=2, label='实测容量')
+        for model, part in g.groupby('model', sort=False):
+            ax.plot(part.cycle, part.predicted_Ah, label=names[model], alpha=.85)
+        ax.set(title=battery, xlabel='循环次数', ylabel='容量（Ah）')
+        ax.grid(alpha=.2)
+    axes[0, 0].legend(fontsize=9)
+    fig.suptitle('逐次获得历史实测容量后的单步预测（不是固定起点多步外推）')
+    fig.savefig(dest/'test_predictions.png', dpi=180)
+    plt.close(fig)
+
+
 def main():
     raw = pd.read_csv(ROOT/'results/step01/battery_clean.csv')
     data = make_features(raw)
@@ -108,6 +140,17 @@ def main():
     pd.DataFrame(tuning).to_csv(out/'ridge_validation_search.csv', index=False, encoding='utf-8-sig')
     pd.DataFrame(splits).to_csv(out/'time_splits.csv', index=False, encoding='utf-8-sig')
     (out/'ridge_models.json').write_text(json.dumps(models, ensure_ascii=False, indent=2), encoding='utf-8')
+    plot_results(pd.DataFrame(metrics), pd.concat(predictions))
+    experiment = {
+        'target': 'capacity_Ah at cycle t, using observed history through t-1',
+        'split': 'per-battery floor(0.6*n), floor(0.8*n), remaining test',
+        'history_window': 5, 'features': FEATURES, 'ridge_alpha_candidates': ALPHAS,
+        'selection_metric': 'validation RMSE', 'test_training': 'refit on train+validation',
+        'test_mode': 'one-step with actual observed history; coefficients fixed within test',
+        'input_sha256': hashlib.sha256((ROOT/'results/step01/battery_clean.csv').read_bytes()).hexdigest(),
+        'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        'versions': {'numpy': np.__version__, 'pandas': pd.__version__, 'matplotlib': matplotlib.__version__}}
+    (out/'experiment.json').write_text(json.dumps(experiment, ensure_ascii=False, indent=2), encoding='utf-8')
     print(pd.DataFrame(metrics).to_string(index=False))
 
 

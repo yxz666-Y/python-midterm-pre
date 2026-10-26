@@ -2,14 +2,15 @@
 
 杨晓真 · 25121619
 
-当前仅保留两份分析代码、新版工作过程PPT，以及运行必需的原始CSV和依赖说明。
+## 当前步骤
 
 - `src/01_read_and_clean.py`：数据读取与清洗。
-- `src/02_visualize_degradation.py`：退化曲线与电池个体差异分析。
-- `deliverables/题目三_工作过程_读取清洗与退化分析.pptx`：当前10页过程PPT。
-- `data/battery.csv`：两步分析使用的课程原始数据。
+- `src/02_visualize_degradation.py`：退化曲线与个体差异。
+- `src/03_features_and_models.py`：历史特征、上一循环基线、线性回归与岭回归的单步容量预测。
+- `docs/第三步_特征与建模.md`：建模口径、时间划分、评估结果及版本记录。
+- `deliverables/题目三_工作过程_读取清洗与退化分析.pptx`：保留原10页过程PPT，目前涵盖前两步。
 
-## 运行顺序
+## 运行
 
 ```sh
 python3 -m venv .venv
@@ -17,8 +18,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python src/01_read_and_clean.py
 python src/02_visualize_degradation.py
+python src/03_features_and_models.py
+python -m unittest discover -s tests -v
 ```
 
-运行后自动创建 `results/step01/`、`results/step02/` 和 `figures/step02/`；第二步使用第一步生成的清洗数据。绘图使用Arial Unicode MS中文字体，其他系统需配置可用中文字体。
+输入为 `data/battery.csv`。第二步和第三步均读取第一步清洗结果，第三步不依赖第二步输出。运行结果分别进入results/step01、step02、step03；图表进入figures对应步骤。图表默认使用Arial Unicode MS，其他系统需配置中文字体。
 
-旧报告、旧PPT、其他脚本、讲稿、参考文件副本和已有图表/结果均已从当前版本清除。Git提交历史保留，清理操作也会推送GitHub留痕。
+第三步按每块电池时间先后划分60%/20%/20%，历史窗口不含目标容量，岭回归只用验证段选参，测试前在前80%重拟合。测试是逐次获得历史实测容量后的单步预测，不能解释为固定起点多步预测或剩余寿命。
+
+三种方法中，本次测试的上一循环基线误差最低。结果按真实计算保留，不因为复杂模型没有胜出而修改测试集。
+
+## Git留痕
+
+每新增算法或调整算法方案，运行相应检查后单独提交并推送；不改写或压缩历史。当前仓库保留用户确认的前两份代码和PPT，加上本轮新建的特征建模代码、测试、结果及说明；此前清除的旧材料不恢复。

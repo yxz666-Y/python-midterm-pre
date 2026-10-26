@@ -1,0 +1,28 @@
+{
+  "target": "capacity_Ah at cycle t, using observed history through t-1",
+  "split": "per-battery floor(0.6*n), floor(0.8*n), remaining test",
+  "history_window": 5,
+  "features": [
+    "cycle",
+    "lag1_Ah",
+    "mean5_Ah",
+    "slope5_Ah_per_cycle"
+  ],
+  "ridge_alpha_candidates": [
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0
+  ],
+  "selection_metric": "validation RMSE",
+  "test_training": "refit on train+validation",
+  "test_mode": "one-step with actual observed history; coefficients fixed within test",
+  "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
+  "script_sha256": "70d40dfc05a94c8083d6126d5693fe719cbbe20a2244fccf6127e5e0f987a714",
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "matplotlib": "3.11.2"
+  }
+}
