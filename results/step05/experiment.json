@@ -1,0 +1,20 @@
+{
+  "horizons": [
+    1,
+    5,
+    10
+  ],
+  "features": [
+    "target_cycle",
+    "origin_capacity_Ah",
+    "mean5_Ah",
+    "slope5_Ah_per_cycle"
+  ],
+  "recent_linear_window": 20,
+  "split_rule": "fit targets <= cutoff; validation/test origins >= fitted-label cutoff",
+  "forecast_mode": "at each origin forecast directly h cycles ahead, using history through origin only",
+  "common_test_origins": "from floor(0.8*n) through n-max(horizons), same origins for all horizons",
+  "limitations": "same four previously inspected batteries; exploratory comparison, not new independent validation",
+  "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
+  "script_sha256": "e715d1f7d8252869f2fb084b27518565380f56cd5ed2cc4a7597e0a642c91b6b"
+}
