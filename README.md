@@ -38,7 +38,7 @@ python -m unittest discover -s tests -v
 - `src/04_evaluation_and_uncertainty.py`：读取01和03的结果，分析容量高估与低估、核对80%研究阈值事件覆盖，并进行固定起点线性寿命外推的历史长度敏感性实验。
 - 新增滚动预警回测：从第30次起用已知历史预测未来5次内首次跨阈值，比较容量保持基线和最近20次线性趋势；提前量须在有效预测范围内，未知标签不计作负样本。
 - 运行：`python src/04_evaluation_and_uncertainty.py`；结果在`results/step04`，四张图在`figures/step04`。
-- 说明见`docs/第四步_评估与不确定性.md`，对应报告第6章与第7章建议；Word和PPT尚未更新。
+- 说明见`docs/第四步_评估与不确定性.md`；阶段Word报告及27页过程PPT已纳入该步的评估与风险说明。
 - 四块电池首次跨80%阈值均早于第三步测试段，当前测试不能验证首次事件的提前预警；外推敏感性不是置信区间，80%不是设备通用更换标准。
 - 加强每电池三种模型的完整性检查；修正单步误报被计为提前预警的问题。新增回测属于同四块电池上的探索性分析，重叠窗口不作为独立样本。
 - 复查：`python -m unittest discover -s tests -v`。本轮24项检查通过。
@@ -52,3 +52,9 @@ python -m unittest discover -s tests -v
 `deliverables/数据分析报告_杨晓真_25121619.docx` 为六页阶段报告，整合前四步的数据检查、差异、跳变对照、已有预测及预警风险。生成入口为 `tools/build_data_report.py`，文档依赖另列于 `tools/requirements-report.txt`，分析环境不必安装。
 
 新一轮运行 `python src/05_multihorizon_models.py`，比较提前1、5、10次的容量保持、最近20次线性趋势和直接多步岭回归。详见 `docs/第五步_多步容量建模.md`，结果在results/step05，图表在figures/step05。主比较统一预测起点，模型拟合所用标签不得晚于预测起点，参数只由验证段选择。36项检查通过。第三步模型结果保持不变。
+
+## 两轮建模与预测报告
+
+`deliverables/两轮建模与预测报告_杨晓真_25121619.docx` 为10页专题报告，汇总第三步单步预测与第五步提前1、5、10次预测，包含特征定义、时间划分、岭回归选参、逐电池误差、8张实测与预测曲线和固定起点实例。两次实验的测试口径分别说明，不直接混比误差。报告保留预测失败案例，不将容量预测等同于剩余寿命预测。
+
+运行 `python tools/plot_model_report.py` 从保存的预测表重绘图表，并独立重算核对第一轮24组与第二轮144组指标；核对记录和输入哈希在 `results/model_report/source_verification.json`，图表在 `figures/model_report`。安装文档依赖后运行 `python tools/build_model_report.py` 生成Word。此报告仅整理已有结果，没有修改模型、参数或测试数据。
