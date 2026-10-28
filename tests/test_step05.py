@@ -33,7 +33,7 @@ class MultiHorizonTests(unittest.TestCase):
 
     def test_horizons_share_common_test_origins(self):
         _,pred,_=m.experiment(self.raw)
-        for battery,g in pred[(pred.split=='test')&pred.common_origin].groupby('battery_id'):
+        for (battery,split),g in pred[pred.common_origin].groupby(['battery_id','split']):
             sets=[set(v.origin_cycle) for _,v in g.groupby(['horizon','model'])]
             self.assertTrue(all(s==sets[0] for s in sets))
 

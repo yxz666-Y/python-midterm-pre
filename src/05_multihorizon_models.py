@@ -75,7 +75,8 @@ def experiment(raw):
                 part=target[['battery_id','horizon','origin_cycle','target_cycle','actual_Ah','split','observation_end_cycle']].copy()
                 part['model']=model; part['predicted_Ah']=values
                 part['model_information_cutoff_cycle']=(target.origin_cycle.to_numpy() if model!='ridge_direct' else cutoff)
-                part['common_origin']=(part.origin_cycle<=part.observation_end_cycle-max(HORIZONS))
+                evaluation_end=int(target.validation_end_cycle.iloc[0] if split=='validation' else target.observation_end_cycle.iloc[0])
+                part['common_origin']=(part.origin_cycle<=evaluation_end-max(HORIZONS))
                 predictions.append(part)
     predictions=pd.concat(predictions,ignore_index=True)
     metrics=[]

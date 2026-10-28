@@ -16,5 +16,5 @@
   "common_test_origins": "from floor(0.8*n) through n-max(horizons), same origins for all horizons",
   "limitations": "same four previously inspected batteries; exploratory comparison, not new independent validation",
   "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
-  "script_sha256": "e715d1f7d8252869f2fb084b27518565380f56cd5ed2cc4a7597e0a642c91b6b"
+  "script_sha256": "b296a4255401c85fa14cf2a07393bbca917179557ef303d886edd55fe4f7d6eb"
 }
