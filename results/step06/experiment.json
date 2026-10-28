@@ -1,0 +1,19 @@
+{
+  "algorithm": "ordinary least squares with intercept, four inputs, no regularization",
+  "selection": "no hyperparameters; no test-based tuning",
+  "script_sha256": "5d7aaa29ac8f773a7b67ddb78807234b83ce21c59807c9d481a9fdcfe7fc24bb",
+  "target": "capacity_Ah at cycle t using history through t-1",
+  "features": [
+    "cycle",
+    "lag1_Ah",
+    "mean5_Ah",
+    "slope5_Ah_per_cycle"
+  ],
+  "history_window": 5,
+  "split": "per battery floor(0.6*n), floor(0.8*n), rest test",
+  "final_fit": "train+validation; fixed estimator throughout test",
+  "test_mode": "rolling one-step; actual preceding history available",
+  "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
+  "numpy_version": "2.3.5",
+  "pandas_version": "2.2.3"
+}
