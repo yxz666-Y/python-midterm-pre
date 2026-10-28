@@ -10,6 +10,7 @@ import pandas as pd
 
 ROOT=Path(__file__).resolve().parents[1]
 HORIZONS=(1,5,10)
+ALPHAS=(0.01,0.1,1.,10.,100.)
 FEATURES=['target_cycle','origin_capacity_Ah','mean5_Ah','slope5_Ah_per_cycle']
 
 
@@ -60,17 +61,47 @@ def score(actual,predicted):
             'bias_Ah':float(np.mean(error))}
 
 
+def fit_direct_ridge(train,alpha):
+    """每个horizon独立拟合Q(origin+h)，仅用已知目标。"""
+    x=train[FEATURES].to_numpy(dtype=float)
+    mean,scale=x.mean(axis=0),x.std(axis=0)
+    scale=np.where(scale==0,1.,scale)
+    design=np.column_stack([np.ones(len(x)),(x-mean)/scale])
+    beta=np.linalg.solve(design.T@design+np.diag([0.]+[alpha]*len(FEATURES)),
+                         design.T@train.actual_Ah.to_numpy())
+    return {'alpha':float(alpha),'features':FEATURES,'mean':mean.tolist(),'scale':scale.tolist(),
+            'coefficients_standardized':beta.tolist(),
+            'latest_fitted_target_cycle':int(train.target_cycle.max())}
+
+
+def predict_direct_ridge(model,target):
+    x=(target[FEATURES].to_numpy()-model['mean'])/model['scale']
+    return np.column_stack([np.ones(len(x)),x])@model['coefficients_standardized']
+
+
+def choose_alpha(g):
+    train=g[g.split=='train'];val=g[g.split=='validation']
+    search=[{'alpha':a,**score(val.actual_Ah,predict_direct_ridge(fit_direct_ridge(train,a),val))}
+            for a in ALPHAS]
+    return min(search,key=lambda r:r['RMSE_Ah'])['alpha'],search
+
+
 def experiment(raw):
     samples=make_samples(raw)
-    predictions=[]
+    predictions=[]; tuning=[]; models={}
     histories={b:g.sort_values('cycle').capacity_Ah.to_numpy() for b,g in raw.groupby('battery_id')}
     for (battery,h),g in samples.groupby(['battery_id','horizon']):
+        alpha,search=choose_alpha(g)
+        tuning.extend({'battery_id':battery,'horizon':int(h),**r} for r in search)
+        final_model=fit_direct_ridge(g[g.target_cycle<=g.validation_end_cycle],alpha)
+        models[f'{battery}_h{h}']=final_model
         for split in ['validation','test']:
             target=g[g.split==split]
             cutoff=int(g.train_end_cycle.iloc[0] if split=='validation' else g.validation_end_cycle.iloc[0])
             assert (target.origin_cycle>=cutoff).all()
             outputs={'persistence':target.origin_capacity_Ah.to_numpy(),
-                'linear_recent20':np.array([recent_linear(histories[battery][:int(o)],h) for o in target.origin_cycle])}
+                'linear_recent20':np.array([recent_linear(histories[battery][:int(o)],h) for o in target.origin_cycle]),
+                'ridge_direct':predict_direct_ridge(fit_direct_ridge(g[g.split=='train'],alpha) if split=='validation' else final_model,target)}
             for model,values in outputs.items():
                 part=target[['battery_id','horizon','origin_cycle','target_cycle','actual_Ah','split','observation_end_cycle']].copy()
                 part['model']=model; part['predicted_Ah']=values
@@ -84,16 +115,18 @@ def experiment(raw):
         for scope,part in [('all_available',g),('common_origins',g[g.common_origin])]:
             metrics.append({'battery_id':battery,'horizon':h,'split':split,'model':model,
                             'scope':scope,'n':len(part),**score(part.actual_Ah,part.predicted_Ah)})
-    return samples,predictions,pd.DataFrame(metrics)
+    return samples,predictions,pd.DataFrame(metrics),pd.DataFrame(tuning),models
 
 
 def main():
     raw=pd.read_csv(ROOT/'results/step01/battery_clean.csv')
-    samples,predictions,metrics=experiment(raw)
+    samples,predictions,metrics,tuning,models=experiment(raw)
     out=ROOT/'results/step05';out.mkdir(parents=True,exist_ok=True)
-    for name,df in [('features',samples),('predictions',predictions),('metrics',metrics)]:
+    for name,df in [('features',samples),('predictions',predictions),('metrics',metrics),('ridge_validation_search',tuning)]:
         df.to_csv(out/(name+'.csv'),index=False,encoding='utf-8-sig')
-    config={'horizons':HORIZONS,'features':FEATURES,'recent_linear_window':20,
+    (out/'ridge_models.json').write_text(json.dumps(models,ensure_ascii=False,indent=2),encoding='utf-8')
+    config={'ridge_alpha_candidates':ALPHAS,'parameter_selection':'validation RMSE only',
+            'horizons':HORIZONS,'features':FEATURES,'recent_linear_window':20,
             'split_rule':'fit targets <= cutoff; validation/test origins >= fitted-label cutoff',
             'forecast_mode':'at each origin forecast directly h cycles ahead, using history through origin only',
             'common_test_origins':'from floor(0.8*n) through n-max(horizons), same origins for all horizons',

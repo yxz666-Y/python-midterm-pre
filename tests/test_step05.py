@@ -32,10 +32,35 @@ class MultiHorizonTests(unittest.TestCase):
             self.assertTrue((test.target_cycle<=test.observation_end_cycle).all())
 
     def test_horizons_share_common_test_origins(self):
-        _,pred,_=m.experiment(self.raw)
+        _,pred,_,_,_=m.experiment(self.raw)
         for (battery,split),g in pred[pred.common_origin].groupby(['battery_id','split']):
             sets=[set(v.origin_cycle) for _,v in g.groupby(['horizon','model'])]
             self.assertTrue(all(s==sets[0] for s in sets))
+
+    def test_no_unavailable_targets_in_model(self):
+        _,pred,_,_,models=m.experiment(self.raw)
+        self.assertTrue((pred.model_information_cutoff_cycle<=pred.origin_cycle).all())
+        for key,model in models.items():
+            self.assertEqual(model['latest_fitted_target_cycle'],105 if key.startswith('B0018') else 134)
+
+    def test_test_targets_do_not_select_alpha_or_first_forecast(self):
+        _,a,_,search_a,models_a=m.experiment(self.raw)
+        changed=self.raw.copy()
+        for battery,g in changed.groupby('battery_id'):
+            changed.loc[(changed.battery_id==battery)&(changed.cycle>int(len(g)*.8)),'capacity_Ah']+=1
+        _,b,_,search_b,models_b=m.experiment(changed)
+        pd.testing.assert_frame_equal(search_a,search_b)
+        self.assertEqual(models_a,models_b)
+        first=a[(a.split=='test')].groupby(['battery_id','horizon','model']).origin_cycle.transform('min')
+        mask=(a.split=='test') & (a.origin_cycle==first.reindex(a.index))
+        np.testing.assert_allclose(a.loc[mask,'predicted_Ah'],b.loc[mask,'predicted_Ah'])
+
+    def test_ridge_constant_capacity(self):
+        data=m.make_samples(self.raw)
+        train=data[(data.battery_id=='B0005')&(data.horizon==5)&(data.split=='train')].copy()
+        train['actual_Ah']=2.
+        model=m.fit_direct_ridge(train,10.)
+        np.testing.assert_allclose(m.predict_direct_ridge(model,data[data.horizon==5]),2.,atol=1e-8)
 
     def test_invalid_keys_rejected(self):
         with self.assertRaises(ValueError):m.make_samples(pd.concat([self.raw,self.raw.iloc[:1]]))
