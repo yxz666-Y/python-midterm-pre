@@ -1,0 +1,13 @@
+﻿battery_id,model,n,threshold_Ah,TP,FP,FN,TN,precision,recall,false_positive_rate,first_cross_status,first_event_alert_target_cycle,event_lead_cycles,event_evaluation_status
+B0005,linear_ols,34,1.4852,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0005,persistence,34,1.4852,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0005,random_forest,34,1.4852,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0006,linear_ols,34,1.62824,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0006,persistence,34,1.62824,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0006,random_forest,34,1.62824,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0007,linear_ols,34,1.51288,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0007,persistence,34,1.51288,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0007,random_forest,34,1.51288,34,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0018,linear_ols,27,1.484,27,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0018,persistence,27,1.484,27,0,0,0,1.0,1.0,,before_test,,,not_applicable
+B0018,random_forest,27,1.484,27,0,0,0,1.0,1.0,,before_test,,,not_applicable

@@ -1,0 +1,46 @@
+{
+  "threshold_ratio": 0.8,
+  "threshold_reference": "first observed capacity per battery",
+  "origins": [
+    0.3,
+    0.5,
+    0.7
+  ],
+  "origin_rule": "floor(fraction * observed length)",
+  "event_definition": "first measured capacity <= threshold, no sustained-crossing rule",
+  "alert_mode": "one-step; only correctly predicted first-crossing target gives lead=1",
+  "rolling_warning": {
+    "start_cycle": 30,
+    "horizon_cycles": 5,
+    "fit_window": 20,
+    "models": [
+      "persistence",
+      "linear_recent"
+    ],
+    "stopping": "after first observed crossing",
+    "unknown_label": "incomplete horizon without observed crossing",
+    "event_matching": "actual first crossing within fixed forecast horizon",
+    "parameters": "fixed before running this exploratory backtest"
+  },
+  "extrapolation_mode": "linear capacity trend fitted on prefix only; frozen at origin",
+  "limitations": [
+    "retrospective origins depend on available record lengths",
+    "sensitivity spread is not a confidence or prediction interval",
+    "no new battery or variable-temperature validation",
+    "test results are descriptive, not further model selection",
+    "rolling windows overlap and share the same four already examined batteries",
+    "rolling event detection is horizon-based, not accurate crossing-date prediction"
+  ],
+  "inputs_sha256": {
+    "clean": "3b161031d14de4b857a9af4a7cc19791214ec0ad6578d858b55068f28c7deda7",
+    "predictions": "41f73d78a8940df3e700aa95c1314142662fb43e3503a724cfb1c22fa9c48729"
+  },
+  "script_sha256": "64c010d77437a533e0f3df3885e5799c17c6c564a7e8f9b0255be73d03fc8e65",
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "matplotlib": "3.11.2"
+  },
+  "plot_font": "Microsoft YaHei"
+}
