@@ -1,0 +1,54 @@
+{
+  "battery_id": "B0006",
+  "target_cycle": 135,
+  "features": {
+    "cycle": 135.0,
+    "lag1_Ah": 1.3474,
+    "mean5_Ah": 1.32534,
+    "slope5_Ah_per_cycle": 0.005129999999999945
+  },
+  "actual_Ah": 1.326,
+  "first_tree_path": [
+    {
+      "feature": "lag1_Ah",
+      "observed": 1.3474,
+      "threshold": 1.640150010585785,
+      "branch": "<="
+    },
+    {
+      "feature": "cycle",
+      "observed": 135.0,
+      "threshold": 99.0,
+      "branch": ">"
+    },
+    {
+      "feature": "lag1_Ah",
+      "observed": 1.3474,
+      "threshold": 1.38400000333786,
+      "branch": "<="
+    },
+    {
+      "feature": "lag1_Ah",
+      "observed": 1.3474,
+      "threshold": 1.3499499559402466,
+      "branch": "<="
+    },
+    {
+      "feature": "cycle",
+      "observed": 135.0,
+      "threshold": 131.5,
+      "branch": ">"
+    }
+  ],
+  "first_tree_leaf_value_Ah": 1.3279666666666665,
+  "first_tree_leaf_unique_training_n": 3,
+  "tree_count": 300,
+  "tree_prediction_min_Ah": 1.3177800000000002,
+  "tree_prediction_max_Ah": 1.3723125,
+  "tree_prediction_mean_Ah": 1.3325409993506494,
+  "predictions": {
+    "persistence": 1.3474,
+    "linear_ols": 1.3319786198899406,
+    "random_forest": 1.332540999350651
+  }
+}

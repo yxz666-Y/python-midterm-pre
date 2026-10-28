@@ -8,7 +8,7 @@
 - `src/02_visualize_degradation.py`：退化曲线与个体差异。
 - `src/03_features_and_models.py`：历史特征、上一循环基线、线性回归与岭回归的单步容量预测。
 - `docs/第三步_特征与建模.md`：建模口径、时间划分、评估结果及版本记录。
-- `deliverables/题目三_工作过程.pptx`：27页过程PPT，记录读取清洗、退化分析、单步与多步建模、组员评估、统计跳变对照及Git版本。
+- `deliverables/题目三_工作过程.pptx`：34页过程PPT，记录读取清洗、退化分析、单步与多步建模、组员评估、统计跳变对照、普通回归与随机森林比较及Git版本。
 
 ## 运行
 
@@ -58,3 +58,18 @@ python -m unittest discover -s tests -v
 `deliverables/两轮建模与预测报告_杨晓真_25121619.docx` 为10页专题报告，汇总第三步单步预测与第五步提前1、5、10次预测，包含特征定义、时间划分、岭回归选参、逐电池误差、8张实测与预测曲线和固定起点实例。两次实验的测试口径分别说明，不直接混比误差。报告保留预测失败案例，不将容量预测等同于剩余寿命预测。
 
 运行 `python tools/plot_model_report.py` 从保存的预测表重绘图表，并独立重算核对第一轮24组与第二轮144组指标；核对记录和输入哈希在 `results/model_report/source_verification.json`，图表在 `figures/model_report`。安装文档依赖后运行 `python tools/build_model_report.py` 生成Word。此报告仅整理已有结果，没有修改模型、参数或测试数据。
+
+## 新一轮普通回归与随机森林比较
+
+为区分预测距离和算法，本轮固定预测下一次容量。`src/06_linear_regression.py` 使用普通最小二乘多元线性回归，`src/07_random_forest.py` 使用300棵树的随机森林。两者使用相同4个特征、相同时间划分、相同129个测试目标。森林仅根据验证段选择6种树深/叶大小组合，完整保存24条搜索结果。训练加验证重拟合后，测试估计器固定，逐次获得此前真实历史。
+
+```sh
+python src/06_linear_regression.py
+python src/07_random_forest.py
+python src/08_compare_regression_and_forest.py
+python -m unittest discover -s tests -v
+```
+
+各模型分别保存在results/step06和step07，比较结果与核对记录在results/step08，6张图在figures/step08。普通回归、森林的独立Git版本分别为`a1a2940`、`8e4d38e`，均已推送。44项检查通过，24组指标独立重算一致。四电池等权平均测试RMSE为基线0.014425、回归0.017370、森林0.058766 Ah。直接容量森林在前三块电池后期持续高估，报告保留该失败结果，不在测试集上追加调参。
+
+新报告为`deliverables/普通线性回归与随机森林预测报告_杨晓真_25121619.docx`，10页，解释提前距离、两类算法的原理和公平比较，并展示参数、完整误差、四块电池曲线与散点。生成入口`tools/build_regression_forest_report.py`，PPT第28至34页记录本轮过程。具体方案见`docs/第六七步_两类模型实验方案.md`。本轮是同四块已查看电池上的追加方法比较，不视为新电池外部验证。

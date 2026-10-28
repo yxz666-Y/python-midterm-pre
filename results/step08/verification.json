@@ -1,0 +1,21 @@
+{
+  "verified_metric_groups": 24,
+  "test_targets_per_model": 129,
+  "model_count": 3,
+  "checks": [
+    "all metric fields recomputed",
+    "same target keys and actual values for all models",
+    "actual values equal original CSV"
+  ],
+  "sources_sha256": {
+    "src/06_linear_regression.py": "5d7aaa29ac8f773a7b67ddb78807234b83ce21c59807c9d481a9fdcfe7fc24bb",
+    "src/07_random_forest.py": "62c1a20efac633a9a6502f7a5cfa8cd77b6d9ec78b7f2530cfc6c779b33eeffe",
+    "src/comparison_common.py": "34d847a0d8a174341e5b0205d2e4b2492e8c29e03e6d89181d9403370b9ecf5c",
+    "results/step06/predictions.csv": "2d1293ec3da187f2bc543038319e56a6a7af9db34bb02e5b588288982422b4f2",
+    "results/step07/predictions.csv": "806001a7112d9fa05413521bb08c762154d9841a045b10dba9dbc730ade01a9c",
+    "results/step06/linear_models.json": "60eda7e9999c56ea8e26e6d31b40ba993c585b3c50c2adbaf4a4ecb562ffa8d5",
+    "results/step07/forest_metadata.json": "a598f4d097d4ff2e0a81e144da551bba40d5323061a3c6ffb74609db576aface",
+    "results/step07/validation_search.csv": "19d39fb302d6cbe2433e15aaf20b4c9a7e012773016b70a77c8d492c56458931",
+    "data/battery.csv": "3b161031d14de4b857a9af4a7cc19791214ec0ad6578d858b55068f28c7deda7"
+  }
+}

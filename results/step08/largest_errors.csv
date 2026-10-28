@@ -1,0 +1,4 @@
+﻿battery_id,cycle,split,model,actual_Ah,predicted_Ah,error_Ah
+B0018,106,test,linear_ols,1.4604,1.3534639503676251,-0.1069360496323748
+B0018,106,test,persistence,1.4604,1.3567,-0.1036999999999999
+B0006,164,test,random_forest,1.1538,1.326880892279943,0.17308089227994317
