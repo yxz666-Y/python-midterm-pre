@@ -1,4 +1,9 @@
 {
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "matplotlib": "3.11.2"
+  },
   "ridge_alpha_candidates": [
     0.01,
     0.1,
@@ -24,5 +29,5 @@
   "common_test_origins": "from floor(0.8*n) through n-max(horizons), same origins for all horizons",
   "limitations": "same four previously inspected batteries; exploratory comparison, not new independent validation",
   "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
-  "script_sha256": "1e13c9591cd989e2842478702972484b2876b358a98a71355b71406799e12e5d"
+  "script_sha256": "afa4511365455a4517a959fd8907e5072bc3e3d14e6812dbd84143bee7aefffd"
 }

@@ -62,6 +62,15 @@ class MultiHorizonTests(unittest.TestCase):
         model=m.fit_direct_ridge(train,10.)
         np.testing.assert_allclose(m.predict_direct_ridge(model,data[data.horizon==5]),2.,atol=1e-8)
 
+    def test_one_step_matches_previous_stage(self):
+        _,pred,_,_,_=m.experiment(self.raw)
+        old=pd.read_csv(ROOT/'results/step03/predictions.csv')
+        old=old[(old.split=='test')&(old.model=='ridge_history')]
+        new=pred[(pred.split=='test')&(pred.horizon==1)&(pred.model=='ridge_direct')]
+        merged=old.merge(new,left_on=['battery_id','cycle'],right_on=['battery_id','target_cycle'])
+        self.assertEqual(len(merged),129)
+        np.testing.assert_allclose(merged.predicted_Ah_x,merged.predicted_Ah_y,atol=1e-8)
+
     def test_invalid_keys_rejected(self):
         with self.assertRaises(ValueError):m.make_samples(pd.concat([self.raw,self.raw.iloc[:1]]))
         bad=self.raw.copy();bad.loc[0,'capacity_Ah']=np.nan

@@ -46,3 +46,9 @@ python -m unittest discover -s tests -v
 ## 补充清洗：统计跳变
 
 `src/01b_check_capacity_jumps.py` 在第一步之后运行，用训练段变化量的1.5IQR/3IQR规则标记跳变，对极端点另生成限幅对照。详见 `docs/补充清洗_统计跳变与限幅对照.md`。当前识别58条待核查观测，其中30条进入处理对照；它们不是已证实的测量错误。原始数据及现有模型输入保持不变。
+
+## 阶段报告与第五步
+
+`deliverables/数据分析报告_杨晓真_25121619.docx` 为六页阶段报告，整合前四步的数据检查、差异、跳变对照、已有预测及预警风险。生成入口为 `tools/build_data_report.py`，文档依赖另列于 `tools/requirements-report.txt`，分析环境不必安装。
+
+新一轮运行 `python src/05_multihorizon_models.py`，比较提前1、5、10次的容量保持、最近20次线性趋势和直接多步岭回归。详见 `docs/第五步_多步容量建模.md`，结果在results/step05，图表在figures/step05。主比较统一预测起点，模型拟合所用标签不得晚于预测起点，参数只由验证段选择。36项检查通过。第三步模型结果保持不变。

@@ -5,6 +5,9 @@
 from pathlib import Path
 import json
 import hashlib
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -118,6 +121,34 @@ def experiment(raw):
     return samples,predictions,pd.DataFrame(metrics),pd.DataFrame(tuning),models
 
 
+def plot_and_summarize(metrics,predictions,out):
+    common=metrics[(metrics.split=='test')&(metrics.scope=='common_origins')]
+    macro=common.groupby(['horizon','model'],as_index=False)[['MAE_Ah','RMSE_Ah','bias_Ah']].mean()
+    macro['aggregation']='unweighted mean of four per-battery metrics'
+    macro.to_csv(out/'macro_common_origins.csv',index=False,encoding='utf-8-sig')
+    dest=ROOT/'figures/step05';dest.mkdir(parents=True,exist_ok=True)
+    plt.rcParams.update({'font.family':'Arial Unicode MS','axes.unicode_minus':False})
+    names={'persistence':'容量保持基线','linear_recent20':'最近20次线性趋势','ridge_direct':'直接多步岭回归'}
+    fig,axes=plt.subplots(1,3,figsize=(14,4.5),layout='constrained',sharey=True)
+    for ax,h in zip(axes,HORIZONS):
+        table=common[common.horizon==h].pivot(index='battery_id',columns='model',values='RMSE_Ah')
+        table[list(names)].rename(columns=names).plot.bar(ax=ax,rot=0,legend=False)
+        ax.set(title=f'提前{h}次',xlabel='电池编号',ylabel='RMSE（Ah）')
+    handles,labels=axes[0].get_legend_handles_labels()
+    fig.legend(handles,labels,loc='outside lower center',ncol=3)
+    fig.suptitle('共同预测起点的测试误差：前三块各25个起点，B0018为18个')
+    fig.savefig(dest/'multihorizon_comparison.png',dpi=180);plt.close(fig)
+    fig,ax=plt.subplots(figsize=(9,5),layout='constrained')
+    for model,name in names.items():
+        part=macro[macro.model==model]
+        ax.plot(part.horizon,part.RMSE_Ah,marker='o',label=name)
+    ax.set(xlabel='提前预测的循环数',ylabel='四块电池RMSE的算术平均（Ah）',xticks=HORIZONS,
+           title='预测距离与误差：各电池等权汇总，使用共同起点')
+    ax.grid(alpha=.2);ax.legend()
+    fig.savefig(dest/'macro_error_by_horizon.png',dpi=180);plt.close(fig)
+    return macro
+
+
 def main():
     raw=pd.read_csv(ROOT/'results/step01/battery_clean.csv')
     samples,predictions,metrics,tuning,models=experiment(raw)
@@ -125,7 +156,9 @@ def main():
     for name,df in [('features',samples),('predictions',predictions),('metrics',metrics),('ridge_validation_search',tuning)]:
         df.to_csv(out/(name+'.csv'),index=False,encoding='utf-8-sig')
     (out/'ridge_models.json').write_text(json.dumps(models,ensure_ascii=False,indent=2),encoding='utf-8')
-    config={'ridge_alpha_candidates':ALPHAS,'parameter_selection':'validation RMSE only',
+    macro=plot_and_summarize(metrics,predictions,out)
+    config={'versions':{'numpy':np.__version__,'pandas':pd.__version__,'matplotlib':matplotlib.__version__},
+            'ridge_alpha_candidates':ALPHAS,'parameter_selection':'validation RMSE only',
             'horizons':HORIZONS,'features':FEATURES,'recent_linear_window':20,
             'split_rule':'fit targets <= cutoff; validation/test origins >= fitted-label cutoff',
             'forecast_mode':'at each origin forecast directly h cycles ahead, using history through origin only',
@@ -134,7 +167,7 @@ def main():
             'input_sha256':hashlib.sha256((ROOT/'results/step01/battery_clean.csv').read_bytes()).hexdigest(),
             'script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     (out/'experiment.json').write_text(json.dumps(config,ensure_ascii=False,indent=2),encoding='utf-8')
-    print(metrics[(metrics.split=='test')&(metrics.scope=='common_origins')].to_string(index=False))
+    print(macro.to_string(index=False))
 
 
 if __name__=='__main__':main()
