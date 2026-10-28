@@ -1,0 +1,52 @@
+{
+  "algorithm": "RandomForestRegressor predicting absolute capacity",
+  "candidate_grid": [
+    {
+      "max_depth": 2,
+      "min_samples_leaf": 3
+    },
+    {
+      "max_depth": 2,
+      "min_samples_leaf": 8
+    },
+    {
+      "max_depth": 4,
+      "min_samples_leaf": 3
+    },
+    {
+      "max_depth": 4,
+      "min_samples_leaf": 8
+    },
+    {
+      "max_depth": null,
+      "min_samples_leaf": 3
+    },
+    {
+      "max_depth": null,
+      "min_samples_leaf": 8
+    }
+  ],
+  "selection": "per-battery validation RMSE minimum; first candidate breaks exact ties",
+  "n_estimators": 300,
+  "random_state": 25121619,
+  "bootstrap": true,
+  "max_features": 1.0,
+  "n_jobs": 1,
+  "sklearn_version": "1.7.2",
+  "joblib_version": "1.5.2",
+  "script_sha256": "62c1a20efac633a9a6502f7a5cfa8cd77b6d9ec78b7f2530cfc6c779b33eeffe",
+  "target": "capacity_Ah at cycle t using history through t-1",
+  "features": [
+    "cycle",
+    "lag1_Ah",
+    "mean5_Ah",
+    "slope5_Ah_per_cycle"
+  ],
+  "history_window": 5,
+  "split": "per battery floor(0.6*n), floor(0.8*n), rest test",
+  "final_fit": "train+validation; fixed estimator throughout test",
+  "test_mode": "rolling one-step; actual preceding history available",
+  "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
+  "numpy_version": "2.3.5",
+  "pandas_version": "2.2.3"
+}

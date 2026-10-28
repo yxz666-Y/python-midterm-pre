@@ -1,0 +1,50 @@
+{
+  "B0005": {
+    "selected_parameters": {
+      "max_depth": null,
+      "min_samples_leaf": 3
+    },
+    "fit_first_target": 6,
+    "fit_last_target": 134,
+    "fit_n": 129,
+    "fit_capacity_min_Ah": 1.3647,
+    "fit_capacity_max_Ah": 1.8518,
+    "observed_max_tree_depth": 8
+  },
+  "B0006": {
+    "selected_parameters": {
+      "max_depth": null,
+      "min_samples_leaf": 3
+    },
+    "fit_first_target": 6,
+    "fit_last_target": 134,
+    "fit_n": 129,
+    "fit_capacity_min_Ah": 1.3156,
+    "fit_capacity_max_Ah": 2.0139,
+    "observed_max_tree_depth": 8
+  },
+  "B0007": {
+    "selected_parameters": {
+      "max_depth": null,
+      "min_samples_leaf": 3
+    },
+    "fit_first_target": 6,
+    "fit_last_target": 134,
+    "fit_n": 129,
+    "fit_capacity_min_Ah": 1.477,
+    "fit_capacity_max_Ah": 1.8835,
+    "observed_max_tree_depth": 9
+  },
+  "B0018": {
+    "selected_parameters": {
+      "max_depth": 4,
+      "min_samples_leaf": 3
+    },
+    "fit_first_target": 6,
+    "fit_last_target": 105,
+    "fit_n": 100,
+    "fit_capacity_min_Ah": 1.3567,
+    "fit_capacity_max_Ah": 1.8285,
+    "observed_max_tree_depth": 4
+  }
+}
