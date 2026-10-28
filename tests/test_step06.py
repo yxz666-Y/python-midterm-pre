@@ -15,10 +15,21 @@ class LinearProtocolTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls): cls.data = module.load_features()
 
-    def test_shared_features_identical_to_previous_saved_data(self):
+    def test_features_identical_to_saved_current_experiment(self):
         import pandas as pd
-        old = pd.read_csv(SRC.parent/'results/step03/features.csv')
-        np.testing.assert_allclose(self.data[module.FEATURES], old[module.FEATURES], atol=1e-12)
+        saved = pd.read_csv(SRC.parent/'results/step06/features.csv')
+        np.testing.assert_allclose(self.data[module.FEATURES], saved[module.FEATURES], atol=1e-12)
+
+    def test_current_and_future_capacity_do_not_change_current_features(self):
+        import pandas as pd
+        from comparison_common import make_features
+        raw = pd.read_csv(SRC.parent/'results/step01/battery_clean.csv')
+        changed = raw.copy()
+        changed.loc[(changed.battery_id == 'B0005')&(changed.cycle >= 135),'capacity_Ah'] = 999.
+        transformed = make_features(changed)
+        a = self.data[(self.data.battery_id == 'B0005')&(self.data.cycle <= 135)]
+        b = transformed[(transformed.battery_id == 'B0005')&(transformed.cycle <= 135)]
+        np.testing.assert_array_equal(a[module.FEATURES].to_numpy(), b[module.FEATURES].to_numpy())
 
     def test_feature_window_ends_before_target(self):
         import pandas as pd
@@ -28,6 +39,7 @@ class LinearProtocolTests(unittest.TestCase):
             self.assertEqual(len(history), 5)
             self.assertAlmostEqual(r.lag1_Ah, history.iloc[-1].capacity_Ah)
             self.assertAlmostEqual(r.mean5_Ah, history.capacity_Ah.mean())
+            self.assertAlmostEqual(r.slope5_Ah_per_cycle, np.polyfit(history.cycle,history.capacity_Ah,1)[0])
 
     def test_raw_coefficient_formula_matches_standardized_prediction(self):
         g = self.data[self.data.battery_id == 'B0005']

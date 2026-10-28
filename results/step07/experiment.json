@@ -47,6 +47,7 @@
   "final_fit": "train+validation; fixed estimator throughout test",
   "test_mode": "rolling one-step; actual preceding history available",
   "input_sha256": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
+  "feature_script_sha256": "287df0eb30318fea2d2546a62612946e8f750a79ba37384a76a8418ee3c9226c",
   "numpy_version": "2.3.5",
   "pandas_version": "2.2.3"
 }

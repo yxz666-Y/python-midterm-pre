@@ -1,9 +1,0 @@
-﻿battery_id,model,observed_first_cross_cycle,event_status,first_valid_alert_origin,event_lead_cycles,false_alert_origins
-B0005,persistence,101.0,missed,,,0
-B0005,linear_recent,101.0,missed,,,0
-B0006,persistence,61.0,missed,,,0
-B0006,linear_recent,61.0,detected,60.0,1.0,0
-B0007,persistence,124.0,missed,,,0
-B0007,linear_recent,124.0,detected,119.0,5.0,5
-B0018,persistence,75.0,missed,,,0
-B0018,linear_recent,75.0,detected,70.0,5.0,3

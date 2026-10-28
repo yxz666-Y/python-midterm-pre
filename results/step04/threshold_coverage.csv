@@ -1,5 +1,0 @@
-﻿battery_id,threshold_ratio,threshold_Ah,observed_first_cross_cycle,observation_end,test_start,first_cross_status
-B0005,0.8,1.4852,101.0,168,135,before_test
-B0006,0.8,1.62824,61.0,168,135,before_test
-B0007,0.8,1.51288,124.0,168,135,before_test
-B0018,0.8,1.484,75.0,132,106,before_test

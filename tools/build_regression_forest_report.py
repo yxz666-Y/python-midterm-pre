@@ -1,7 +1,6 @@
 """生成普通线性回归与随机森林容量预测报告。使用Codex工作区Python依赖运行。"""
 from pathlib import Path
 import csv
-import hashlib
 from docx import Document
 from docx.shared import Cm, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -12,10 +11,6 @@ from docx.oxml.ns import qn
 ROOT=Path(__file__).resolve().parents[1]
 def read_csv(path):
     with (ROOT/path).open(encoding='utf-8-sig') as f: return list(csv.DictReader(f))
-summary=read_csv('results/step01/battery_summary.csv')
-common=read_csv('results/step02/common_window_comparison.csv')
-metrics=read_csv('results/step03/metrics.csv')
-raw_hash=hashlib.sha256((ROOT/'data/battery.csv').read_bytes()).hexdigest()
 # 课程模板用于章节结构参考。本阶段报告不填写未经确认的小组身份信息。
 doc=Document()
 sec=doc.sections[0];sec.page_width=Cm(21);sec.page_height=Cm(29.7)
@@ -103,18 +98,18 @@ def metric(b,m):return next(r for r in test if r['battery_id']==b and r['model']
 
 p('普通线性回归与随机森林\n电池容量预测比较报告','Title')
 p('杨晓真  学号25121619\n2026年10月28日  题目三 无人设备电池健康评估与剩余寿命预测')
-p('本报告重新开展两次建模：实验A使用普通最小二乘线性回归，实验B使用随机森林回归。两者使用相同四个输入、相同时间段和相同下一次容量目标，便于辨认算法差别。结果显示普通回归的平均误差低于本次随机森林，容量保持基线的平均误差更低。')
-h('1 提前一次五次十次的含义')
-p('假设第134次充放电已经结束，我们只知道截至第134次的容量。提前1次是预测第135次，提前5次是预测第139次，提前10次是预测第144次。这里的“次”是充放电循环数，不能直接换算为天数或飞行分钟。')
-table(['已知历史截至','提前距离','预测的目标','关注的问题'],[
- ['第134次','1次','第135次容量','下一次容量是否继续变化'],
- ['第134次','5次','第139次容量','若干次使用后的容量水平'],
- ['第134次','10次','第144次容量','更远期的容量变化与外推误差']],[3.4,2.3,3.8,6.9])
-p('此前多步实验把历史样本配成“起点特征X(o)”和“第o＋h次容量Q(o＋h)”，分别学习距离h的预测关系。预测第144次时不能提前读取第135至143次真实容量。模型到下一个预测起点后，才能加入当时刚测得的新历史。')
-p('比较距离可以检验提早掌握容量变化的可能性，以及外推误差如何变化。是否能提前预警，还需要单独定义阈值事件并回测。多步容量预测本身不等于已准确预测寿命。为了单独比较算法，本次两种新模型均只做提前1次预测。')
+p('本报告比较两种主要模型：实验A使用普通最小二乘线性回归，实验B使用随机森林回归。两者使用相同四个输入、相同时间段和相同下一次容量目标，便于辨认算法差别。结果显示普通回归的平均误差低于本次随机森林，容量保持比较基线的平均误差更低。')
+h('1 建模任务与当前方法')
+p('我们根据电池已经发生的循环容量变化，预测下一次循环的放电容量。例如第134次充放电结束后，使用截至第134次的真实观测预测第135次容量。第135次实测值在之后获得，只用于评价这一次预测。')
+table(['角色','方法','输入信息','预测目标'],[
+ ['主要模型A','普通线性回归','四个相同的历史特征','下一次循环容量 Ah'],
+ ['主要模型B','随机森林回归','四个相同的历史特征','下一次循环容量 Ah'],
+ ['比较基线','容量保持','最近一次实测容量','下一次循环容量 Ah']],[2.8,4.0,5.3,4.3])
+p('容量随循环次数的总体下降用于描述退化，近期均值和斜率用于提取容量水平及变化趋势。普通回归把这些信息加权相加，随机森林学习分组规则后平均预测。容量保持不学习参数，仅作为参照，不列为第三种主要模型。')
+p('移动到下一个预测目标时，可以加入当时刚测得的历史容量，但两个估计器在整个测试段保持固定。本报告评估单步容量预测，循环次数不能直接换算为天数或飞行分钟，容量误差也不能直接解释为剩余寿命误差。')
 page()
 h('2 本次两类方法的原理与区别')
-p('普通线性回归把四个输入乘以各自系数后相加，再加一个截距，得到预测容量。训练通过最小化预测误差的平方和求出系数。本次是四变量多元线性回归，属于简单、可解释的回归方法，没有加入岭回归的系数惩罚。')
+p('普通线性回归把四个输入乘以各自系数后相加，再加一个截距，得到预测容量。训练通过最小化预测误差的平方和求出系数。本次是四变量多元线性回归，属于简单、可解释的回归方法，拟合时不对系数增加惩罚项。')
 p('随机森林训练300棵回归树。每棵树从拟合段有放回抽样，按特征阈值不断分组，在叶节点取训练容量的平均值。预测时样本在每棵树中走到一个叶节点，再将300棵树的预测平均。它可形成分段的非线性关系。')
 table(['比较项','实验A 普通线性回归','实验B 随机森林'],[
  ['拟合关系','截距加四个输入的加权和','多棵决策树的分段预测平均'],
@@ -123,7 +118,7 @@ table(['比较项','实验A 普通线性回归','实验B 随机森林'],[
  ['控制复杂度','本次无正则化或参数搜索','验证段选择树深和叶节点大小'],
  ['容量外推','数值可越过训练容量范围','本次均值型森林受训练容量范围限制'],
  ['解释方式','查看回归系数及误差','查看树路径、平均值及误差']],[3.0,6.7,6.7])
-p('严格说，普通回归也是监督学习的一种。本报告按课程要求，用普通线性回归代表简单回归，用树集成代表另一类机器学习方法。此前的岭回归仍属于线性模型，原先两轮还改变了预测距离、训练窗口或特征，不能把两轮结果直接当作两类算法的公平比较。')
+p('严格说，普通回归也是监督学习的一种。本报告按课程要求，用普通线性回归代表简单回归，用树集成代表另一类机器学习方法。两种主要模型都使用同样的输入、时间段和目标，才能对其学习规则及预测表现作直接比较。')
 h('同一个样本在随机森林中如何预测')
 p(f'以B0006第135次为例，第一棵树先检查上次容量1.3474 Ah是否不超过1.640150 Ah，再检查目标循环135是否大于99，随后继续按阈值分组。该样本最终的第一棵树预测为{fmt(example["first_tree_leaf_value_Ah"])} Ah。')
 p(f'300棵树对此样本的预测介于{fmt(example["tree_prediction_min_Ah"])}至{fmt(example["tree_prediction_max_Ah"])} Ah，平均为{fmt(example["tree_prediction_mean_Ah"])} Ah。完整树路径和均值核对保存在worked_example.json中。单棵树输出不是最终森林输出。')
@@ -146,7 +141,7 @@ p('MAE是绝对误差的平均值。RMSE是误差平方平均后开方，对大�
 page()
 h('4 实验A 普通线性回归的建模与预测')
 p('模型为预测容量＝截距＋循环系数×t＋上次容量系数×Q(t−1)＋均值系数×最近5次均值＋斜率系数×最近5次斜率。代码先按拟合段标准化输入再求最小二乘解，以改善数值尺度，并保存等价的原始单位系数。测试数据不参与标准化。')
-p('本次没有alpha惩罚、树深或其他调参。这里的“简单”指普通回归算法，四个输入共同参与预测，不能误写成只用循环次数的一元回归。与此前第三步只用循环次数的直线相比，这次加入相同历史特征以公平对照森林。')
+p('普通回归不搜索超参数。这里的“简单”指普通回归算法，四个输入共同参与预测，是多元线性回归。普通回归和森林都使用这四个输入，比较时不更换目标或删减困难样本。')
 table(['电池','回归MAE Ah','回归RMSE Ah','基线RMSE Ah'],[
  [b,fmt(metric(b,'linear_ols')['MAE_Ah']),fmt(metric(b,'linear_ols')['RMSE_Ah']),fmt(metric(b,'persistence')['RMSE_Ah'])] for b in batteries],[2.8,4.5,4.5,4.6])
 p('普通回归在B0006上略优于基线，另外三块上误差更大。它可以跟随近期容量水平和趋势，但并未稳定预测局部突变。不能把加入更多特征理解为误差必然下降。')
@@ -210,8 +205,8 @@ table(['记录','内容'],[
  ['8e4d38e','实验B代码、24组验证搜索、四个森林及预测'],
  ['src/08_compare_regression_and_forest.py','重算24组指标、核对相同目标、生成比较图'],
  ['results/step08/verification.json','输入及源码哈希与核对记录']],[6.4,10])
-p('依次运行src/01_read_and_clean.py、src/06_linear_regression.py、src/07_random_forest.py、src/08_compare_regression_and_forest.py。使用requirements.txt的分析依赖。安装tools/requirements-report.txt后运行tools/build_regression_forest_report.py生成本文。模型参数和逐点预测均保留，原先实验未覆盖。')
-p('本次44项代码检查通过，覆盖原有36项与新增8项。24组误差指标已从逐点预测独立重算，三种方法的目标编号和实测值一致，实测值与原始CSV逐点一致。')
+p('依次运行src/01_read_and_clean.py、src/06_linear_regression.py、src/07_random_forest.py、src/08_compare_regression_and_forest.py。特征提取独立保存在src/comparison_common.py中。使用requirements.txt的分析依赖。安装tools/requirements-report.txt后运行tools/build_regression_forest_report.py生成本文。')
+p('当前12项代码检查通过，覆盖统计跳变对照、历史特征不读取当前或未来容量、时间划分、回归参数重建、森林选参及保存模型复现等约束。24组误差指标已从逐点预测独立重算，两种模型和比较基线的目标与实测值一致，实测值与原始CSV逐点一致。')
 p('方法参考为scikit-learn官方文档：LinearRegression说明普通最小二乘；RandomForestRegressor说明回归树集成和平均预测。实现使用scikit-learn 1.7.2，森林参数配置另存experiment.json。')
 p('https://scikit-learn.org/1.7/modules/generated/sklearn.linear_model.LinearRegression.html\nhttps://scikit-learn.org/1.7/modules/generated/sklearn.ensemble.RandomForestRegressor.html')
 p('仓库 https://github.com/yxz666-Y/python-midterm-pre\n报告由Codex协助编写和核对，成员承担按实际理解与核查情况据实说明。')
