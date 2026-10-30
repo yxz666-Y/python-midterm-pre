@@ -18,6 +18,7 @@
 - `src/07_random_forest.py`：300棵树，固定随机种子25121619，验证段从6种树深与叶大小组合选参。结果与保存模型在results/step07。
 - `src/08_compare_regression_and_forest.py`：比较两种模型及容量保持基线，核对逐点预测，结果在results/step08，6张图在figures/step08。
 - `docs/普通线性回归与随机森林建模说明.md`：特征、时间划分、参数、误差和解释范围。
+- `docs/数据清洗与预处理说明.md`：数据清洗与预处理说明.md的字段、清洗检查顺序、实测结果、跳变标记与产物清单，可作为报告对应章节的内容。
 
 预测第t次容量时，容量特征最多使用第t−1次数据。每块电池按原始循环数量的60%和80%设训练与验证边界，测试前在训练加验证段重新拟合。测试估计器固定，逐次获得真实历史进行下一循环预测。两种模型使用相同129个测试目标，不代表129块独立电池。
 
@@ -38,13 +39,15 @@ python src/08_compare_regression_and_forest.py
 python -m unittest discover -s tests -v
 ```
 
-当前共37项检查通过（数据清洗7项、跳变对照3项、回归5项、森林4项、第九步18项），24组指标独立重算一致。图表默认使用Arial Unicode MS，其他系统需配置中文字体。两个模型的数字文件名保留，运行顺序以上述清单为准。
+当前共37项检查通过（数据清洗7项、跳变对照3项、回归5项、森林4项、第九步18项），24组指标独立重算一致。图表默认使用Arial Unicode MS，其他系统需配置中文字体。两个模型的数字文件名保留，运行顺序以上述清单为准。若GitHub连接受限可直接用 GitHub Desktop（它会读取系统代理），或临时指定代理：`git -c http.proxy=http://127.0.0.1:代理端口 push origin main`（不改变本机 git 配置）。
 
 ## 当前交付材料
 
 - `deliverables/普通线性回归与随机森林预测报告_杨晓真_25121619.docx`：当前两种主要模型的报告。
-- `deliverables/题目三_工作过程.pptx`：21页，记录数据读取清洗、统计跳变、退化差异、特征与时间划分，以及两种主要模型的过程与结果。
+- `deliverables/题目三_工作过程.pptx`：24页，记录数据读取清洗、统计跳变、退化差异、特征与时间划分、两种主要模型的过程与结果，以及第22至24页的误差高估风险、提前预警与寿命外推不确定性、使用维护与更换建议。
 - `tools/build_regression_forest_report.py`：报告生成脚本，文档依赖在tools/requirements-report.txt。
+- `tools/append_ppt_pages.py`：在过程PPT末尾追加第22至24页，`python tools/append_ppt_pages.py`；重复运行会因页面已存在而停止，不会重复追加。文档依赖同样在tools/requirements-report.txt。
+- `tools/build_slides.py`：生成精炼汇报版`deliverables/题目三_汇报.pptx`（13页，覆盖题目三四项基本任务），`python tools/build_slides.py`。
 
 ## Git版本管理
 
