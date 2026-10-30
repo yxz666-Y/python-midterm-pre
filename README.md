@@ -38,7 +38,7 @@ python src/08_compare_regression_and_forest.py
 python -m unittest discover -s tests -v
 ```
 
-当前12项检查通过，24组指标独立重算一致。图表默认使用Arial Unicode MS，其他系统需配置中文字体。两个模型的数字文件名保留，运行顺序以上述清单为准。
+当前共37项检查通过（数据清洗7项、跳变对照3项、回归5项、森林4项、第九步18项），24组指标独立重算一致。图表默认使用Arial Unicode MS，其他系统需配置中文字体。两个模型的数字文件名保留，运行顺序以上述清单为准。
 
 ## 当前交付材料
 
