@@ -1,4 +1,3 @@
-"""普通线性回归与随机森林的独立特征提取及统一评估口径。"""
 from pathlib import Path
 import hashlib
 import json
@@ -11,7 +10,6 @@ INPUT = ROOT/'results/step01/battery_clean.csv'
 
 
 def make_features(raw):
-    """预测t时容量窗口最多到t−1，前5次仅作历史，不填充未来值。"""
     frames = []
     for battery, g in raw.groupby('battery_id'):
         g = g.sort_values('cycle').copy()

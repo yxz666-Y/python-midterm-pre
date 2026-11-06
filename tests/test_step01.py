@@ -1,8 +1,3 @@
-"""核对第一步清洗结果：不做新的处理，只检查每一项约束是否真的成立。
-
-读取data/battery.csv与results/step01的产物，逐条复核01_read_and_clean.py
-声明的检查，包括字段、类型、缺失、重复、有效性与循环连续性。
-"""
 import unittest
 from pathlib import Path
 import numpy as np
@@ -20,7 +15,6 @@ def load_raw():
 
 
 def load_clean():
-    """统一排序后再检查，使结果与行顺序无关。"""
     return pd.read_csv(CLEAN, encoding='utf-8-sig').sort_values(
         ['battery_id', 'cycle']).reset_index(drop=True)
 
@@ -37,7 +31,6 @@ class CleanedDataTests(unittest.TestCase):
         clean = load_clean()
         self.assertEqual(int(clean.isna().sum().sum()), 0)
         self.assertEqual(int(clean.duplicated().sum()), 0)
-        # 同一电池、同一循环不允许存在不同记录。
         self.assertEqual(int(clean.duplicated(['battery_id', 'cycle']).sum()), 0)
 
     def test_capacity_and_cycle_are_valid(self):

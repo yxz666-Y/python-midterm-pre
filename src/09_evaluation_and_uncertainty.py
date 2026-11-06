@@ -1,8 +1,3 @@
-"""第九步：误差、阈值预警与寿命外推敏感性。
-
-先运行01、06、07、08。本步骤读取统一预测，不重训或选择两种主要模型。
-80%是相对首循环容量的研究阈值，不是设备安全或厂商更换标准。
-"""
 from pathlib import Path
 import hashlib
 import json
@@ -17,9 +12,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 RATIO = .80
-# 预先固定观察长度；每次仅用起点及以前的数据拟合，不以外推效果选窗口。
 ORIGIN_FRACTIONS = (.30, .50, .70)
-# 独立的探索性滚动预警方案：结果产生前固定，不根据本轮回测选参。
 ROLLING_START = 30
 ROLLING_HORIZON = 5
 ROLLING_WINDOW = 20
@@ -29,7 +22,6 @@ NAMES = {'persistence': '上一循环基线', 'linear_ols': '普通线性回归'
 
 
 def first_crossing(cycles, capacities, threshold):
-    """首次实测容量<=阈值；未发生时返回NaN，不把记录末尾当寿命。"""
     cycles, capacities = np.asarray(cycles), np.asarray(capacities)
     crossed = cycles[capacities <= threshold]
     return float(crossed[0]) if len(crossed) else np.nan
@@ -116,7 +108,6 @@ def alert_analysis(raw, test, ratio=RATIO):
             row = {'battery_id': battery, 'model': model, 'n': len(part),
                    'threshold_Ah': threshold,
                    **confusion(part.actual_Ah <= threshold, part.predicted_Ah <= threshold)}
-            # 单步预测只覆盖下一次。更早循环的误报不能冒充首次跨越预警。
             crossing_row = part[part.cycle == cross] if status == 'in_test' else part.iloc[:0]
             detected = bool(len(crossing_row) and (crossing_row.predicted_Ah <= threshold).iloc[0])
             event = cross if detected else np.nan
@@ -131,7 +122,6 @@ def alert_analysis(raw, test, ratio=RATIO):
 
 
 def rolling_forecasts(history, horizon=ROLLING_HORIZON, window=ROLLING_WINDOW):
-    """只接收截至起点的实测历史；未来容量不能进入此函数。"""
     if horizon < 1 or window < 2 or len(history) < window:
         raise ValueError('预测范围须为正，且历史长度必须覆盖至少两个点的拟合窗口')
     history = history.sort_values('cycle')
@@ -146,11 +136,6 @@ def rolling_forecasts(history, horizon=ROLLING_HORIZON, window=ROLLING_WINDOW):
 
 def rolling_backtest(raw, min_history=ROLLING_START, horizon=ROLLING_HORIZON,
                      window=ROLLING_WINDOW, ratio=RATIO):
-    """预测未来H次内是否首次跨阈值；已有跨越后停止，标签不参与拟合。
-
-    临近记录末端，不足H次且尚未观察到跨越时，标签未知，不当成负样本。
-    相邻起点窗口重叠，输出为探索性时间回测，不是独立样本泛化评估。
-    """
     if min_history < window or window < 2 or horizon < 1 or not 0 < ratio < 1:
         raise ValueError('滚动回测配置不合法')
     rows, events = [], []
@@ -162,7 +147,7 @@ def rolling_backtest(raw, min_history=ROLLING_START, horizon=ROLLING_HORIZON,
         for count in range(min_history, len(source)):
             history = source.iloc[:count]
             if (history.capacity_Ah <= threshold).any():
-                break  # 此时已知道发生过首次跨越，不再将回升当成新的首次事件。
+                break
             origin = int(history.cycle.iloc[-1])
             forecasts = rolling_forecasts(history, horizon, window)
             future = source.iloc[count:count+horizon]
@@ -184,7 +169,6 @@ def rolling_backtest(raw, min_history=ROLLING_START, horizon=ROLLING_HORIZON,
         rows.extend(battery_rows)
         for model in ROLLING_NAMES:
             records = [r for r in battery_rows if r['model'] == model]
-            # 有效提前量要求真实事件位于该次预先规定的H步预测范围内。
             hits = [r for r in records if r['label_status'] == 'known'
                     and r['actual_event_within_horizon'] and r['predicted_alert']]
             observed = bool(np.isfinite(cross))
@@ -230,7 +214,6 @@ def plot_rolling(metrics, dest):
 
 
 def fit_extrapolation(history, threshold):
-    """固定起点线性外推；只有history参与拟合，斜率非负时不强造寿命。"""
     x = history.cycle.to_numpy(float)
     y = history.capacity_Ah.to_numpy(float)
     intercept, slope = np.linalg.lstsq(np.column_stack([np.ones(len(x)), x]), y, rcond=None)[0]
@@ -254,7 +237,6 @@ def lifetime_sensitivity(raw):
     for battery, g in raw.groupby('battery_id'):
         g = g.sort_values('cycle')
         threshold = float(g.capacity_Ah.iloc[0]*RATIO)
-        # 后续实测只用于回顾评价，不送入历史拟合。
         observed = first_crossing(g.cycle, g.capacity_Ah, threshold)
         for fraction in ORIGIN_FRACTIONS:
             count = int(len(g)*fraction)

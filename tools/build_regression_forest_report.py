@@ -1,4 +1,3 @@
-"""生成普通线性回归与随机森林容量预测报告。使用Codex工作区Python依赖运行。"""
 from pathlib import Path
 import csv
 from docx import Document
@@ -11,7 +10,6 @@ from docx.oxml.ns import qn
 ROOT=Path(__file__).resolve().parents[1]
 def read_csv(path):
     with (ROOT/path).open(encoding='utf-8-sig') as f: return list(csv.DictReader(f))
-# 课程模板用于章节结构参考。本阶段报告不填写未经确认的小组身份信息。
 doc=Document()
 sec=doc.sections[0];sec.page_width=Cm(21);sec.page_height=Cm(29.7)
 sec.top_margin=Cm(2.2);sec.bottom_margin=Cm(2.1);sec.left_margin=Cm(2.3);sec.right_margin=Cm(2.3)
@@ -27,7 +25,6 @@ for n in ['Heading 1','Heading 2']:
     doc.styles[n].paragraph_format.space_before=Pt(9)
     doc.styles[n].paragraph_format.space_after=Pt(8)
     doc.styles[n].paragraph_format.keep_with_next=True
-# 删除默认模板可能携带的段落边框和主题字体引用。
 for st in doc.styles:
     for border in list(st.element.iter(qn('w:pBdr'))):
         border.getparent().remove(border)
@@ -38,7 +35,6 @@ for st in doc.styles:
         for k in ['asciiTheme','hAnsiTheme','eastAsiaTheme','cstheme']:
             rf.attrib.pop(qn('w:'+k),None)
         for k in ['ascii','hAnsi','eastAsia','cs']:rf.set(qn('w:'+k),'Arial Unicode MS')
-# 页码仅用于定位报告内容。
 f=sec.footer.paragraphs[0];f.alignment=WD_ALIGN_PARAGRAPH.CENTER
 field=OxmlElement('w:fldSimple');field.set(qn('w:instr'),'PAGE');f._p.append(field)
 

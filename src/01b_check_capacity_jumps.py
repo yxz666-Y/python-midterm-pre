@@ -1,7 +1,3 @@
-"""补充清洗：检测容量跳变，输出带标记原值和限幅处理对照。
-统计离群不等于测量错误，处理版仅供敏感性分析，不覆盖正式清洗数据。
-阈值仅用每块电池前60%记录估计，与03的训练边界一致；不是在线早期检测。
-"""
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -22,7 +18,6 @@ def check_jumps(data):
             raise ValueError('循环必须从1开始且连续')
         delta = g.capacity_Ah.diff()
         end = int(len(g)*.6)
-        # 对相邻变化量而非容量本身检测，避免把正常后期低容量当成异常。
         q1, q3 = delta.iloc[1:end].quantile([.25, .75])
         iqr = q3-q1
         if iqr <= 1e-12:
@@ -33,8 +28,6 @@ def check_jumps(data):
         g['review_flag'] = (delta < inner_lo) | (delta > inner_hi)
         g['extreme_flag'] = (delta < outer_lo) | (delta > outer_hi)
         g['capacity_treated_Ah'] = g.capacity_Ah
-        # 极端点的变化量裁剪到3IQR边界，再加回上一循环原始容量。
-        # 使用原始前值而不是递归累加，避免一次修正导致所有后续容量平移。
         replacement = g.capacity_Ah.shift(1) + delta.clip(outer_lo, outer_hi)
         g.loc[g.extreme_flag, 'capacity_treated_Ah'] = replacement[g.extreme_flag]
         g['adjustment_Ah'] = g.capacity_treated_Ah-g.capacity_Ah

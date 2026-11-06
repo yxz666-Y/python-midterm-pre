@@ -1,4 +1,3 @@
-"""只读取第六七步保存结果，核对指标并生成两类算法的比较图表。"""
 import hashlib
 import json
 import joblib
@@ -23,7 +22,6 @@ def main():
             np.testing.assert_allclose(value,getattr(r,field),atol=1e-12)
     raw = pd.read_csv(ROOT/'data/battery.csv').set_index(['battery_id','cycle']).capacity_Ah
     for r in pred.itertuples(): np.testing.assert_allclose(r.actual_Ah,raw.loc[r.battery_id,r.cycle],atol=1e-12)
-    # 各方法的目标完全一致，禁止通过删除难预测的测试点改善指标。
     expected = pred[pred.model == 'linear_ols'][['battery_id','split','cycle','actual_Ah']].sort_values(['battery_id','split','cycle']).reset_index(drop=True)
     for model in NAMES:
         actual = pred[pred.model == model][expected.columns].sort_values(['battery_id','split','cycle']).reset_index(drop=True)

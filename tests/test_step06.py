@@ -1,4 +1,3 @@
-"""核对新回归的时间约束、重建公式及预测口径。"""
 import importlib.util
 from pathlib import Path
 import sys

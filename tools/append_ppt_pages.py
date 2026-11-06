@@ -1,8 +1,3 @@
-"""在过程PPT末尾追加第九步的不确定性评估与维护建议页面。
-
-只读取既有结果，不重新训练模型；重复运行时会因已存在同名主题页而停止。
-用法：python tools/append_ppt_pages.py [--out 交付文件名]
-"""
 from pathlib import Path
 import argparse
 import struct
@@ -46,14 +41,12 @@ PAGES = [
 
 
 def png_size(path):
-    """从PNG文件头读取像素尺寸，用于保持插入图片的长宽比。"""
     head = Path(path).read_bytes()[:26]
     width, height = struct.unpack('>II', head[16:24])
     return width, height
 
 
 def style_run(run, size_pt, name=FONT, bold=False):
-    """同时设置西文与东亚字体，避免中文回退到默认字体。"""
     run.font.size = Pt(size_pt)
     run.font.name = name
     run.font.bold = bold
@@ -68,7 +61,6 @@ def style_run(run, size_pt, name=FONT, bold=False):
 
 
 def add_text(slide, lines, box, size_pt, bold=False):
-    """按行写入一个文本框，每行一个段落。"""
     textbox = slide.shapes.add_textbox(*box)
     frame = textbox.text_frame
     frame.word_wrap = True
@@ -81,7 +73,6 @@ def add_text(slide, lines, box, size_pt, bold=False):
 
 
 def add_scaled_picture(slide, image, box):
-    """按原图长宽比放入给定区域，避免图片被拉伸。"""
     left, top, max_width, max_height = box
     width, height = png_size(image)
     scale = min(max_width / width, max_height / height)
@@ -90,7 +81,6 @@ def add_scaled_picture(slide, image, box):
 
 
 def append_page(prs, spec, page_number):
-    """新建空白页并写入标题、正文（图＋图注或要点）、页脚与页码。"""
     slide = prs.slides.add_slide(prs.slide_layouts[5])
     for placeholder in list(slide.shapes):
         if placeholder.is_placeholder:

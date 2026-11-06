@@ -1,4 +1,3 @@
-"""建模A：四个相同历史特征的普通最小二乘线性回归，无正则化。"""
 import hashlib
 import json
 import numpy as np

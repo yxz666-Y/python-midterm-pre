@@ -1,4 +1,3 @@
-"""第九步的关键约束：删失、阈值、外推未来隔离及误差方向。"""
 import importlib.util
 from pathlib import Path
 import unittest
@@ -68,7 +67,6 @@ class EvaluationTests(unittest.TestCase):
                              'model': ['persistence']*2, 'actual_Ah': [1.7, 1.5],
                              'predicted_Ah': [1.5, 1.4]})
         _, alerts = m.alert_analysis(raw, pred)
-        # 第9次误报不能冒充提前2次；第10次正确预测仅覆盖第9次后的下一次。
         self.assertEqual(alerts.event_lead_cycles.iloc[0], 1.)
         self.assertEqual(alerts.first_event_alert_target_cycle.iloc[0], 10.)
         self.assertEqual(alerts.FP.iloc[0], 1)

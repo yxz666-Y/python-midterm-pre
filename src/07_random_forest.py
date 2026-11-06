@@ -1,4 +1,3 @@
-"""建模B：相同输入与单步目标的随机森林回归，仅验证段选参。"""
 from pathlib import Path
 import hashlib
 import json

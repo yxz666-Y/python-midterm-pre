@@ -1,8 +1,3 @@
-"""生成题目三的汇报PPT（精炼版，约14页，5分钟讲得完）。
-
-不重跑模型，只引用仓库里已有的图片与结果文件。
-用法：python tools/build_slides.py
-"""
 from pathlib import Path
 import struct
 
@@ -195,7 +190,6 @@ def number_footer(slide, number):
 
 def build(prs):
     number = 0
-    # 封面、汇报内容与数据清洗说明
     for spec in [TEXT_PAGES[0], TEXT_PAGES[1], TEXT_PAGES[2]]:
         slide = prs.slides.add_slide(prs.slide_layouts[5])
         number += 1
@@ -207,7 +201,6 @@ def build(prs):
             add_lines(slide, [spec['title']], TITLE_BOX, 29.0)
             add_lines(slide, spec['lines'], BODY_BOX, spec['size'])
             number_footer(slide, number)
-    # 退化曲线与个体差异、差异量化
     for spec in PAGES[:2]:
         slide = prs.slides.add_slide(prs.slide_layouts[5])
         number += 1
@@ -216,7 +209,6 @@ def build(prs):
         add_lines(slide, spec['notes'], NOTE_BOX, 15.0)
         add_lines(slide, [spec['caption']], CAPTION_BOX, 13.0)
         number_footer(slide, number)
-    # 方法说明 → 结果图 → 建议 → 分工
     for spec in [TEXT_PAGES[3], TEXT_PAGES[4]] + PAGES[2:] + [TEXT_PAGES[5], TEXT_PAGES[6]]:
         slide = prs.slides.add_slide(prs.slide_layouts[5])
         number += 1

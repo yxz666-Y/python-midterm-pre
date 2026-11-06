@@ -1,7 +1,3 @@
-"""第二步：画退化曲线，在相同观察窗口内比较电池个体差异。
-运行：python src/02_visualize_degradation.py
-输入来自第一步；不修改原始数据，不拟合预测模型。
-"""
 from pathlib import Path
 import json
 import numpy as np
@@ -19,7 +15,6 @@ plt.rcParams.update({'font.family': 'Arial Unicode MS', 'axes.unicode_minus': Fa
                      'font.size': 12, 'axes.spines.top': False, 'axes.spines.right': False})
 COLORS = ['#176B87', '#D3662E', '#647D32', '#8A4E9C']
 
-# 1. 数据录入：读取第一步的清洗结果，按电池和循环排序。
 df = pd.read_csv(ROOT / 'results/step01/battery_clean.csv')
 df = df.sort_values(['battery_id', 'cycle']).reset_index(drop=True)
 assert not df.isna().any().any(), '请先运行第一步并排查缺失值'
@@ -29,15 +24,11 @@ assert (df.capacity_Ah > 0).all()
 for _, g in df.groupby('battery_id'):
     assert np.array_equal(g.cycle.to_numpy(), np.arange(1, len(g) + 1))
 
-# 2. 计算相对首循环容量。它消除了初始容量大小的影响，
-#    但不是以制造商额定容量定义的 SOH，不直接代表真实剩余寿命。
 df['retention_pct'] = df.capacity_Ah / df.groupby('battery_id').capacity_Ah.transform('first') * 100
-# 相邻两次容量之差：正值表示局部回升，保留原始测量，不强制单调下降。
 df['capacity_change_Ah'] = df.groupby('battery_id').capacity_Ah.diff()
 common_end = int(df.groupby('battery_id').cycle.max().min())
 common = df[df.cycle <= common_end].copy()
 
-# 3. 全部观测曲线：B0018 只有132次记录，线条在132处结束，不补齐未来。
 fig, ax = plt.subplots(figsize=(11, 6), layout='constrained')
 for (battery, g), color in zip(df.groupby('battery_id'), COLORS):
     ax.plot(g.cycle, g.capacity_Ah, label=f'{battery}（{len(g)}次）', color=color, lw=1.8)
@@ -47,7 +38,6 @@ ax.legend()
 fig.savefig(FIG / '01_capacity_all_cycles.png', dpi=180)
 plt.close(fig)
 
-# 4. 公平比较：统一为共同的前132次循环，并比较相对容量保留率。
 fig, ax = plt.subplots(figsize=(11, 6), layout='constrained')
 for (battery, g), color in zip(common.groupby('battery_id'), COLORS):
     ax.plot(g.cycle, g.retention_pct, label=battery, color=color, lw=1.8)
@@ -58,7 +48,6 @@ ax.legend()
 fig.savefig(FIG / '02_retention_common_window.png', dpi=180)
 plt.close(fig)
 
-# 5. 数值差异：首末差是描述性统计，不能当成恒定退化规律向未来外推。
 rows = []
 for battery, g in common.groupby('battery_id'):
     first, last = g.capacity_Ah.iloc[[0, -1]]
@@ -79,7 +68,6 @@ ax.grid(axis='y', alpha=.2)
 fig.savefig(FIG / '03_loss_comparison.png', dpi=180)
 plt.close(fig)
 
-# 6. 导出可复查的表格和PPT图表数据；所有值均由本次计算得到。
 summary.to_csv(OUT / 'common_window_comparison.csv', index=False, encoding='utf-8-sig')
 df.to_csv(OUT / 'curve_data.csv', index=False, encoding='utf-8-sig')
 payload = {'common_end': common_end, 'rows': len(df), 'summary': summary.round(6).to_dict('records'),
