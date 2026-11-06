@@ -1,0 +1,30 @@
+{
+  "purpose": "report illustrations of existing models; no model refitting or tuning",
+  "figures": [
+    "figures/modeling/01_feature_extraction.png",
+    "figures/modeling/02_time_split.png",
+    "figures/modeling/03_linear_prediction.png",
+    "figures/modeling/04_random_forest_prediction.png",
+    "figures/modeling/05_test_rmse_comparison.png"
+  ],
+  "example_battery": "B0006",
+  "example_target_cycle": 135,
+  "feature_values": {
+    "cycle": 135.0,
+    "lag1_Ah": 1.3474,
+    "mean5_Ah": 1.32534,
+    "slope5_Ah_per_cycle": 0.005129999999999945
+  },
+  "linear_prediction_Ah": 1.3319786198899406,
+  "forest_tree_count": 300,
+  "forest_mean_Ah": 1.3325409993506494,
+  "sources_sha256": {
+    "src/comparison_common.py": "3a4f875e6be4cd0b3502744ec88dfc54bc164f3cc358389fdda26e17c5c6750a",
+    "results/step01/battery_clean.csv": "96bbdd050cecac5f6f24d0494748629424a2586e03b2a74d0d211ef8fe832591",
+    "results/step06/linear_models.json": "60eda7e9999c56ea8e26e6d31b40ba993c585b3c50c2adbaf4a4ecb562ffa8d5",
+    "results/step07/B0006_forest.joblib": "a369566c1b7168e32d0d490caa67184936419a5120b02c0efa9de903457b03e2",
+    "results/step08/worked_example.json": "44f78344d529ab4832ee38b86889506873cae51bfe955f4781a23f429e1638b5",
+    "results/step08/metrics.csv": "1f0732f8bfe2bfcf067822f217e301785730d793c3aa88f291da9b2697155519",
+    "results/step08/macro_test.csv": "cb775abc438f0c2cf52e758a079ae1784892a47b02eea843ff29e957b0ca7874"
+  }
+}
